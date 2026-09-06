@@ -5,7 +5,7 @@
  * Reads session state from the reactive PetStateStore (no host polling).
  * GrokBot expression data is imported as a JSON module.
  *
- * @module @deepseek-ai/dsh-client-ui-pet/client/pet
+ * @module @edge-hh/dsh-grokbot-pet/client/pet
  */
 import { createElement, useEffect, useLayoutEffect, useRef, useState, useCallback, useSyncExternalStore } from 'react'
 import type { PetStateStore, PetUsage } from './store.ts'

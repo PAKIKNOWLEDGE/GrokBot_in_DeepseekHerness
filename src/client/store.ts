@@ -2,7 +2,7 @@
  * Reactive store bridging the active session's ConversationSnapshot
  * to a lightweight PetState that the pet component subscribes to.
  *
- * @module @deepseek-ai/dsh-client-ui-pet/client/store
+ * @module @edge-hh/dsh-grokbot-pet/client/store
  */
 import type { ConversationSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SessionId } from '@deepseek-ai/dsh-api-remotes/client'

@@ -1,12 +1,12 @@
 /**
- * @deepseek-ai/dsh-client-ui-pet — Client entry.
+ * @edge-hh/dsh-grokbot-pet — Client entry.
  *
  * Pure client-side plugin: no Host half, no Remote calls.  The pet reads
  * the active session's ConversationSnapshot via useSessions/bind and
  * derives running / tool / step / turn state from it.  GrokBot expression
  * data is bundled as a JSON module (no runtime fs read).
  *
- * @module @deepseek-ai/dsh-client-ui-pet/client
+ * @module @edge-hh/dsh-grokbot-pet/client
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import { createElement } from 'react'
