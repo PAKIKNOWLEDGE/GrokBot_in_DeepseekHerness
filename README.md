@@ -1,9 +1,10 @@
-# GrokBot in DeepseekHarness 🐾
+# GrokBot in DeepseekHarness 
 
 > 把 [LaoA-GrokBot](https://github.com/zhulin025/LaoA-GrokBot) 的 GrokBot 宠物带进 DeepSeek Harness Web GUI 的浏览器客户端插件（`dsh.client` + `dsh.bundle`）：可换装、可拖拽甩出、带惯性物理与碰撞反弹的桌宠，随 dsh web 一起启动。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Platform](https://img.shields.io/badge/Platform-DeepSeek%20Harness%20Web-5b7fe5)
+[![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)
 
 本仓库同时是：
 
@@ -38,7 +39,7 @@ dsh plugin --profile web add git+https://github.com/Edge-HH/GrokBot_in_DeepseekH
 
 ## ✨ 功能
 
-- **原版 GrokBot 渲染**（严格移植自 LaoA-GrokBot，MIT）：6 组官方表情环（待机/思考/工作/开心/倾听/惊讶）、原版眼睛多边形 + 3D 注视 + 眨眼 + 弹簧变形；bounce / tilt / scan / glitch 状态动画
+- **GrokBot 渲染**（移植自 LaoA-GrokBot）：6 组官方表情环（待机/思考/工作/开心/倾听/惊讶）、原版眼睛多边形 + 3D 注视 + 眨眼 + 弹簧变形；bounce / tilt / scan / glitch 状态动画
 - **外观自定义**：10 种颜色（官方 hex，0.22s 过渡）、8 种形状（官方 SVG path）、4 件身体部件 + 4 件趣味配饰，可多选叠穿；右键菜单整合「换装 + 控制」，设置页带实时预览
 - **拖拽物理**：甩出速度 = 松手瞬间鼠标速度（默认阈值 120 px/s），带惯性滑行、动态模糊、残影与边界/输入框碰撞反弹；拖拽不足 24px 视为移动、不甩出
 - **眼睛跟随鼠标**：「始终注视」默认开启（可在设置关闭），鼠标不悬停也看向鼠标
@@ -46,7 +47,7 @@ dsh plugin --profile web add git+https://github.com/Edge-HH/GrokBot_in_DeepseekH
 - **改名**：设置里修改宠物名字，气泡标题、提示文字同步替换
 - **用量气泡**：每轮对话结束后弹出，显示该轮 provider 上报的 tokens 用量与估算金额（DeepSeek 官方定价近似值：输入 ¥2 / 输出 ¥8 / 缓存读 ¥0.5 / 缓存写 ¥2，每百万 tokens —— 仅供参考，非精确账单）
 - **进度气泡**：工具名、请求次数、步数、用时、进度条
-- **WebAudio 合成音效**（请求/工具/回合/弹跳），可关
+- **音效**（请求/工具/回合/弹跳），可关
 - **桌面通知**（Chrome → Windows），右键菜单 → 控制 → 通知授权，可关
 - **隐藏/显示**：右键菜单即时生效
 
