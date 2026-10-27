@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
 import {
   activeSessionId,
   createPetStateStore,
@@ -24,6 +25,19 @@ function observable<T>(initial: T) {
 
 const tick = (ms = 160) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/** Assert that `actual` matches every own key of `expected` (recursively). */
+function assertPartial(actual: unknown, expected: Record<string, unknown>): void {
+  assert.ok(actual != null && typeof actual === 'object', 'expected an object')
+  for (const [key, value] of Object.entries(expected)) {
+    const observed = (actual as Record<string, unknown>)[key]
+    if (value != null && typeof value === 'object') {
+      assertPartial(observed, value as Record<string, unknown>)
+    } else {
+      assert.equal(observed, value, `member "${key}"`)
+    }
+  }
+}
+
 const usageEvent = (inputTokens: number, outputTokens: number, cacheReadTokens = 0) => ({
   type: 'event',
   event: {
@@ -36,7 +50,7 @@ const usageEvent = (inputTokens: number, outputTokens: number, cacheReadTokens =
 
 describe('activeSessionId', () => {
   it('reads the legacy selected id', () => {
-    expect(activeSessionId({ current: 'legacy-1' })).toBe('legacy-1')
+    assert.equal(activeSessionId({ current: 'legacy-1' }), 'legacy-1')
   })
 
   it('selects the row retained by the main view on current lists', () => {
@@ -48,12 +62,12 @@ describe('activeSessionId', () => {
       },
       phase: 'ready',
     }
-    expect(activeSessionId(list)).toBe('a')
+    assert.equal(activeSessionId(list), 'a')
   })
 
   it('returns undefined without a selection', () => {
-    expect(activeSessionId({ ids: [], byId: {}, phase: 'empty' })).toBeUndefined()
-    expect(activeSessionId(null)).toBeUndefined()
+    assert.equal(activeSessionId({ ids: [], byId: {}, phase: 'empty' }), undefined)
+    assert.equal(activeSessionId(null), undefined)
   })
 })
 
@@ -68,12 +82,12 @@ describe('foldEventWindow', () => {
       { type: 'transient', event: { type: 'assistant/live-chunk', seq: 5, time: start + 40, data: {} } },
     ]
     const facts = foldEventWindow(entries, Date.now())
-    expect(facts.turnCount).toBe(1)
-    expect(facts.turn).toBe(2)
-    expect(facts.step).toBe(1)
-    expect(facts.currentTool).toBe('pwsh')
-    expect(facts.lastUsage).toEqual({ input: 30, output: 10, cacheRead: 5, cacheWrite: 0 })
-    expect(facts.elapsedMs).toBeGreaterThanOrEqual(4_900)
+    assert.equal(facts.turnCount, 1)
+    assert.equal(facts.turn, 2)
+    assert.equal(facts.step, 1)
+    assert.equal(facts.currentTool, 'pwsh')
+    assert.deepEqual(facts.lastUsage, { input: 30, output: 10, cacheRead: 5, cacheWrite: 0 })
+    assert.ok(facts.elapsedMs >= 4_900, `elapsed ${facts.elapsedMs}`)
   })
 
   it('clears the tool when its result arrives and ignores subagent calls', () => {
@@ -83,7 +97,7 @@ describe('foldEventWindow', () => {
       { type: 'event', event: { type: 'tool/call', seq: 3, time: 3, data: { turn: 1, step: 1, callId: 'c1', name: 'read', arguments: '{}' } } },
       { type: 'event', event: { type: 'tool/result', seq: 4, time: 4, data: { turn: 1, step: 1, message: { toolCallId: 'c1', role: 'tool' } } } },
     ]
-    expect(foldEventWindow(entries, Date.now()).currentTool).toBeNull()
+    assert.equal(foldEventWindow(entries, Date.now()).currentTool, null)
   })
 })
 
@@ -102,7 +116,7 @@ describe('createPetStateStore — legacy client', () => {
       binding: () => ({ session }),
     })
 
-    expect(store.getSnapshot()).toMatchObject({
+    assertPartial(store.getSnapshot(), {
       running: true,
       currentTool: 'read',
       step: 2,
@@ -122,7 +136,7 @@ describe('createPetStateStore — legacy client', () => {
     })
     await tick()
 
-    expect(store.getSnapshot()).toMatchObject({
+    assertPartial(store.getSnapshot(), {
       running: false,
       currentTool: null,
       step: null,
@@ -158,7 +172,7 @@ describe('createPetStateStore — current client', () => {
       binding: () => ({ session, eventSource: events }),
     })
 
-    expect(store.getSnapshot()).toMatchObject({
+    assertPartial(store.getSnapshot(), {
       running: true,
       currentTool: 'pwsh',
       step: 1,
@@ -167,7 +181,7 @@ describe('createPetStateStore — current client', () => {
       hasSession: true,
       lastUsage: { input: 100, output: 40, cacheRead: 7, cacheWrite: 0 },
     })
-    expect(store.getSnapshot().elapsedMs).toBeGreaterThanOrEqual(2_900)
+    assert.ok(store.getSnapshot().elapsedMs >= 2_900)
 
     // Turn ends: the store follows the session lifecycle and event window.
     events.set({
@@ -185,11 +199,28 @@ describe('createPetStateStore — current client', () => {
     await tick()
 
     const settled = store.getSnapshot()
-    expect(settled.running).toBe(false)
-    expect(settled.currentTool).toBeNull()
-    expect(settled.step).toBeNull()
-    expect(settled.turn).toBe(1)
-    expect(settled.lastUsage).toEqual({ input: 200, output: 60, cacheRead: 0, cacheWrite: 0 })
+    assert.equal(settled.running, false)
+    assert.equal(settled.currentTool, null)
+    assert.equal(settled.step, null)
+    assert.equal(settled.turn, 1)
+    assert.deepEqual(settled.lastUsage, { input: 200, output: 60, cacheRead: 0, cacheWrite: 0 })
+    store.dispose()
+  })
+
+  it('uses the host row running state before the session snapshot reports one', () => {
+    const list = observable<any>({
+      ids: ['s1'],
+      byId: { s1: { id: 's1', retainedBy: { mainView: 1 }, running: true } },
+      phase: 'ready',
+    })
+    const session = observable<any>({ openState: 'loading' })
+    const events = observable<any>({ entries: [] })
+    const store = createPetStateStore({
+      list,
+      binding: () => ({ session, eventSource: events }),
+    })
+
+    assertPartial(store.getSnapshot(), { running: true, hasSession: true, turnCount: 0 })
     store.dispose()
   })
 
@@ -211,7 +242,7 @@ describe('createPetStateStore — current client', () => {
       binding: (id) => (id === 'a' ? { session: sessionA, eventSource: eventsA } : { session: sessionB, eventSource: eventsB }),
     })
 
-    expect(store.getSnapshot().running).toBe(true)
+    assert.equal(store.getSnapshot().running, true)
 
     list.set({
       ids: ['a', 'b'],
@@ -222,31 +253,14 @@ describe('createPetStateStore — current client', () => {
       phase: 'ready',
     })
 
-    expect(store.getSnapshot()).toMatchObject({ running: false, turnCount: 0, hasSession: true })
-    store.dispose()
-  })
-
-  it('uses the host row running state before the session snapshot reports one', () => {
-    const list = observable<any>({
-      ids: ['s1'],
-      byId: { s1: { id: 's1', retainedBy: { mainView: 1 }, running: true } },
-      phase: 'ready',
-    })
-    const session = observable<any>({ openState: 'loading' })
-    const events = observable<any>({ entries: [] })
-    const store = createPetStateStore({
-      list,
-      binding: () => ({ session, eventSource: events }),
-    })
-
-    expect(store.getSnapshot()).toMatchObject({ running: true, hasSession: true, turnCount: 0 })
+    assertPartial(store.getSnapshot(), { running: false, turnCount: 0, hasSession: true })
     store.dispose()
   })
 
   it('disposes cleanly with no selection', () => {
     const list = observable<any>({ ids: [], byId: {}, phase: 'empty' })
     const store = createPetStateStore({ list, binding: () => undefined })
-    expect(store.getSnapshot().hasSession).toBe(false)
+    assert.equal(store.getSnapshot().hasSession, false)
     store.dispose()
   })
 })

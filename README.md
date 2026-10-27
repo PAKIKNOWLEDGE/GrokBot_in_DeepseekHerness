@@ -94,7 +94,7 @@ dsh plugin --profile web add git+https://github.com/PAKIKNOWLEDGE/GrokBot_in_Dee
 pnpm install     # 安装构建依赖（devDependencies）
 pnpm bundle      # tsdown：产出 lib/index.js + lib/invariant.js（node 半段）与 lib/client.js（浏览器半段）
 pnpm typecheck   # tsc --noEmit（浏览器侧类型检查）
-pnpm test        # vitest run（会话桥接双版本单测）
+pnpm test        # node --test（会话桥接双版本单测，无第三方测试框架）
 ```
 
 - `lib/` 为构建产物，已 gitignore，不入库；
