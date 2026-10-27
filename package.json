@@ -24,7 +24,7 @@
     "bundle": "npm run clean && tsdown",
     "build": "npm run clean && tsdown",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "node --test tests/store.spec.ts",
+    "test": "node --test tests/store.spec.ts tests/node-plugin.client.spec.ts",
     "prepare": "tsdown"
   },
   "dsh": {
